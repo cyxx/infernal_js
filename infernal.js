@@ -3,12 +3,12 @@
 // system
 //
 
-const KEY_UP     = 1;
-const KEY_RIGHT  = 2;
-const KEY_DOWN   = 3;
-const KEY_LEFT   = 4;
-const KEY_ACTION = 5;
-const KEY_ESC    = 6;
+const KEY_UP    = 1;
+const KEY_RIGHT = 2;
+const KEY_DOWN  = 3;
+const KEY_LEFT  = 4;
+const KEY_JUMP  = 5;
+const KEY_ESC   = 6;
 
 var keyboard = new Array( 8 );
 
@@ -30,7 +30,7 @@ function set_key_pressed( jcode, state ) {
 	} else if ( jcode == 40 ) {
 		keyboard[ KEY_DOWN ] = state;
 	} else if ( jcode == 32 || jcode == 13 ) {
-		keyboard[ KEY_ACTION ] = state;
+		keyboard[ KEY_JUMP ] = state;
 	} else if ( jcode == 27 ) {
 		keyboard[ KEY_ESC ] = state;
 	}
@@ -66,7 +66,7 @@ const PALETTE_CPC = [
         0xff, 0xff, 0xff  /* 0x4b */
 ];
 
-var palette32 = new Array( 4 );
+var palette32 = new Uint32Array( 4 );
 
 function set_palette_color( pen, ink ) {
 	const offset = ink * 3;
@@ -76,7 +76,7 @@ function set_palette_color( pen, ink ) {
 const SCREEN_W = 320;
 const SCREEN_H = 200;
 
-var screen8 = new Array( SCREEN_W * SCREEN_H ); // this is wasting 6 bits per byte but simplifies the lookups
+var screen8 = new Uint8Array( SCREEN_W * SCREEN_H ); // this is wasting 6 bits per byte but simplifies the lookups
 
 function clear_screen( ) {
 	screen8.fill( 0 );
@@ -106,7 +106,8 @@ function draw_object2( num, x, y ) {
 // threads
 //
 
-var snapshot = new Array( 0xC000 );
+const SNAPSHOT_SIZE = 0xA000;
+var snapshot = new Array( SNAPSHOT_SIZE );
 
 function get_object_width( num ) {
 	return snapshot[ 0x1af6 + num ];
@@ -376,6 +377,7 @@ var highscore = 0;
 var boxes;
 var hunger;
 var lifes;
+var infinite_lifes = false;
 var player_disabled;
 var var_num;
 var keys_flag;
@@ -427,10 +429,12 @@ function initialize( ) {
 }
 
 function restart( ) {
-	lifes -= 1;
-	if ( lifes == 0 ) {
-		state = STATE_TITLE;
-		return;
+	if ( !infinite_lifes ) {
+		lifes -= 1;
+		if ( lifes == 0 ) {
+			state = STATE_TITLE;
+			return;
+		}
 	}
 	console.log( 'restart start_pos:' + start_pos + ' screen_num:' + screen_num );
 	if ( start_pos != 0 ) {
@@ -529,7 +533,7 @@ function update_game_state( ) {
 			keys_flag = 1;
 		} else {
 			if ( start_pos == 0 ) {
-				if ( is_key_pressed( KEY_ACTION ) ) {
+				if ( is_key_pressed( KEY_JUMP ) ) {
 					if ( player_direction != 0 ) {
 						set_thread_bytecode( 6, 0 );
 					} else {
@@ -573,7 +577,7 @@ function update_game_state( ) {
 		if ( start_pos != 0 ) {
 			const tmp = start_pos;
 			start_pos = 0;
-			if ( is_key_pressed( KEY_ACTION ) ) {
+			if ( is_key_pressed( KEY_JUMP ) ) {
 				return false;
 			}
 			start_pos = tmp;
@@ -837,6 +841,10 @@ function mute( ) {
 	return false;
 }
 
+function set_infinite_lifes( b ) {
+	infinite_lifes = b;
+}
+
 function update_screen( ) {
 	var context = canvas.getContext( '2d' );
 	var data = context.getImageData( 0, 0, SCREEN_W, SCREEN_H );
@@ -849,7 +857,7 @@ function update_screen( ) {
 }
 
 function load_snapshot( data ) {
-	for ( var i = 0; i < 0xC000; ++i ) {
+	for ( var i = 0; i < SNAPSHOT_SIZE; ++i ) {
 		snapshot[ i ] = data.charCodeAt( i ) & 0xff;
 	}
 	reset( );
@@ -883,8 +891,8 @@ function tick( ) {
 	}
 	if ( state == STATE_TITLE ) {
 		run_threads( );
-		if ( is_key_pressed( KEY_ACTION ) ) {
-			release_key( KEY_ACTION );
+		if ( is_key_pressed( KEY_JUMP ) ) {
+			release_key( KEY_JUMP );
 			state = STATE_GAME;
 		}
 	} else if ( state == STATE_GAME ) {
