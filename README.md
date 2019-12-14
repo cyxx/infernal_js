@@ -21,7 +21,7 @@ There are 28 opcodes in total, which can be categorized in 5 groups :
 * variables (add, sub, mov)
 * control flow (break, jump)
 
-Implementation of these opcodes can be found [here](https://github.com/cyxx/infernal_js/blob/master/infernal.js#L151)
+Implementation of these opcodes can be found [here](https://github.com/cyxx/infernal_js/blob/master/infernal.js#L150)
 
 As an example, the title screen is not a full screen image but has a dedicated thread to draw its contents (eg. 6 sprites).
 

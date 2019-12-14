@@ -99,7 +99,6 @@ function draw_object( num, x, y ) {
 }
 
 function draw_object2( num, x, y ) {
-	console.log("draw_object2 not implemented");
 	draw_object( num, x, y );
 }
 
@@ -126,8 +125,8 @@ function get_object_addr( num ) {
 var thread_num;
 var threads_bytecode = new Array( 256 );
 var bytecode_offset;
-var vars1 = new Array( 60 );
-var vars2 = new Array( 60 );
+var vars1 = new Array( 60 ); // x_pos
+var vars2 = new Array( 60 ); // y_pos
 
 function clear_vars( ) {
 	vars1.fill( 0 );
@@ -169,7 +168,7 @@ var opcodes = {
 		}
 		vars1[ var_num ] += snapshot[ bytecode_offset++ ];
 	},
-	0x42 /* B */ : function( ) { 
+	0x42 /* B */ : function( ) {
 		if ( player_disabled != 1 && var_num == 0) {
 			if ( ( snapshot[ 0x1ef6 + get_next_tile( ) ] & (1 << 1) ) == 0 ) {
 				bytecode_offset += 1;
@@ -187,7 +186,7 @@ var opcodes = {
 		}
 		vars2[ var_num ] += snapshot[ bytecode_offset++ ];
 	},
-	0x44 /* D */ : function( ) { 
+	0x44 /* D */ : function( ) {
 		if ( player_disabled != 1 && player_jumping != 1 && var_num == 0) {
 			if ( ( snapshot[ 0x1ef6 + get_next_tile( ) ] & (1 << 3) ) == 0 ) {
 				bytecode_offset += 1;
@@ -385,8 +384,6 @@ var ticks;
 var screen_num;
 var break_flag;
 var start_pos;
-var counter1;
-var counter2;
 var counter3;
 var player_direction;
 var player_frame;
@@ -427,10 +424,14 @@ function initialize( ) {
 	set_palette_color( 2, 21 );
 	set_palette_color( 3, 14 );
 	start_pos = 0;
-	counter1 = 12;
 }
 
 function restart( ) {
+	lifes -= 1;
+	if ( lifes == 0 ) {
+		state = STATE_TITLE;
+		return;
+	}
 	console.log( 'restart start_pos:' + start_pos + ' screen_num:' + screen_num );
 	if ( start_pos != 0 ) {
 		if ( start_pos == 6 ) {
@@ -497,12 +498,12 @@ function update_game_state( ) {
 		if ( break_flag == 1 ) {
 			return false;
 		}
-		
-		return true; 
+
+		return true;
 	}
 	tile_flags = snapshot[ 0x1ef6 + get_next_tile( ) ];
 	if ( ( tile_flags & 0xf0 ) != 0 ) { // moving walkway
-		draw_object( player_frame, vars1[ 0 ], vars2[ 0 ] ); 
+		draw_object( player_frame, vars1[ 0 ], vars2[ 0 ] );
 		if ( tile_flags & ( 1 << 4 ) ) {
 			vars1[ 0 ] += 1;
 		}
@@ -515,7 +516,7 @@ function update_game_state( ) {
 		if ( tile_flags & ( 1 << 7 ) ) {
 			vars2[ 0 ] -= 1;
 		}
-		draw_object( player_frame, vars1[ 0 ], vars2[ 0 ] ); 
+		draw_object( player_frame, vars1[ 0 ], vars2[ 0 ] );
 	}
 	var num = get_next_tile( );
 	if ( snapshot[ 0x20f6 + num ] != 0 ) {
@@ -568,14 +569,14 @@ function update_game_state( ) {
 	if ( boxes == 10 && screen_num == 3 && vars1[ 0 ] == 2 && vars2[ 0 ] == 130 ) {
 		state = STATE_COMPLETED;
 	} else {
-		
+
 		if ( start_pos != 0 ) {
-			counter2 = start_pos;
+			const tmp = start_pos;
 			start_pos = 0;
 			if ( is_key_pressed( KEY_ACTION ) ) {
 				return false;
 			}
-			start_pos = counter2;
+			start_pos = tmp;
 			counter3 -= 1;
 			if ( counter3 == 0 ) {
 				return false;
@@ -801,7 +802,7 @@ function init( name ) {
 	document.onkeydown = function( e ) { set_key_pressed( e.keyCode, 1 ); }
 	document.onkeyup   = function( e ) { set_key_pressed( e.keyCode, 0 ); }
 	audio = new Audio( 'inferrun.ogg' );
-	audio.addEventListener('ended', function( ) { this.currentTime = 0; this.play( ); }, false );
+	audio.addEventListener( 'ended' , function( ) { this.currentTime = 0; this.play( ); }, false );
 }
 
 function pause( ) {
