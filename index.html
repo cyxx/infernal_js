@@ -1,0 +1,68 @@
+<html>
+	<head>
+		<title>Infernal Runner JS</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	</head>
+	<body style="margin: 0px auto; text-align: center; padding: 0px 0px; width: 640px; background: #e5e5e5;">
+		<div align="center" style="background-color: #fff; padding-top: 10px; width: 640px; text-align: center;">
+		<h1>Infernal Runner JS</h1>
+		<div align="center">
+			<div align="center" style="font-family: Arial; font-size: 14px; width: 480px; text-align: left;">
+			<p>
+				This is a JavaScript port of the Amstrad CPC game <a href="https://www.mobygames.com/game/infernal-runner">Infernal Runner</a>.
+			</p>
+			<p>
+				Use arrow keys to control the player and Space/Enter to jump.
+			</p>
+			</div>
+			<div align="center" style="width: 384px;">
+				<canvas id="screen" width="320" height="200" style="width: 384px; height: 270px;"></canvas>
+				<p></p>
+				<div align="left">
+					<input type="button" value="Pause"  onclick="onPauseClick()" id="pauseButton" />
+					<input type="button" value="Reset"  onclick="onResetClick()" id="resetButton" />
+					<input type="button" value="Unmute" onclick="onMuteClick()"  id="muteButton"  />
+				</div>
+			</div>
+		</div>
+		<div style="background-color: #eeeeee; margin: 20px 0px 0px 0px; padding: 8px;">
+			<strong>infernal.js</strong> code is available on <a href="http://github.com/cyxx/infernal_js">github.com</a>.
+		</div>
+		<script>
+			window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+			ga('create','UA-100340326-3','auto');
+			ga('send','pageview');
+		</script>
+		<script async src='https://www.google-analytics.com/analytics.js'></script>
+		<script type="text/javascript" src="infernal.min.js"></script>
+		<script type="text/javascript">
+			init( "screen" );
+			var xhr = new XMLHttpRequest( );
+			xhr.onreadystatechange = function() {
+				if ( xhr.readyState == 4 && xhr.status == 200 ) {
+					load_snapshot( atob( xhr.responseText ) );
+				}
+			};
+			xhr.open( "GET", "inferrun.b64", true );
+			xhr.send( );
+			function onPauseClick( ) {
+				if ( pause( ) ) {
+					pauseButton.value = "Play";
+				} else {
+					pauseButton.value = "Pause";
+				}
+			}
+			function onResetClick( ) {
+				reset( );
+			}
+			function onMuteClick( ) {
+				if ( mute( ) ) {
+					muteButton.value = "Unmute";
+				} else {
+					muteButton.value = "Mute";
+				}
+			}
+		</script>
+		</div>
+	</body>
+</html>
