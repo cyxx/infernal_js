@@ -17,7 +17,11 @@
 			</div>
 			<div align="center" style="width: 384px;">
 				<canvas id="screen" width="320" height="200" style="width: 384px; height: 270px;"></canvas>
-				<p></p>
+				<p />
+				<div align="left">
+					<input type="checkbox" onclick="onInfiniteLives()" id="infiniteLivesCheckbox">Infinite Lives</input>
+				</div>
+				<p />
 				<div align="left">
 					<input type="button" value="Pause"  onclick="onPauseClick()" id="pauseButton" />
 					<input type="button" value="Reset"  onclick="onResetClick()" id="resetButton" />
@@ -61,6 +65,9 @@
 				} else {
 					muteButton.value = "Mute";
 				}
+			}
+			function onInfiniteLives( ) {
+				set_infinite_lifes( infiniteLivesCheckbox.checked );
 			}
 		</script>
 		</div>
