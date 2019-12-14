@@ -8,9 +8,8 @@ const KEY_RIGHT = 2;
 const KEY_DOWN  = 3;
 const KEY_LEFT  = 4;
 const KEY_JUMP  = 5;
-const KEY_ESC   = 6;
 
-var keyboard = new Array( 8 );
+var keyboard = new Array( 6 );
 
 function is_key_pressed( code ) {
 	return keyboard[ code ];
@@ -31,8 +30,27 @@ function set_key_pressed( jcode, state ) {
 		keyboard[ KEY_DOWN ] = state;
 	} else if ( jcode == 32 || jcode == 13 ) {
 		keyboard[ KEY_JUMP ] = state;
-	} else if ( jcode == 27 ) {
-		keyboard[ KEY_ESC ] = state;
+	}
+}
+
+function set_touch_key( x, y, state ) {
+	const r = canvas.getBoundingClientRect( );
+	const w = r.width  / 2;
+	const h = r.height / 2;
+	const x1 = r.left + w / 2;
+	const y1 = r.top  + h / 2;
+	const x2 = x1 + w;
+	const y2 = y1 + h;
+	if ( x < x1 ) {
+		keyboard[ KEY_LEFT ] = state;
+	} else if ( x > x2 ) {
+		keyboard[ KEY_RIGHT ] = state;
+	} else if ( y < y1 ) {
+		keyboard[ KEY_UP ] = state;
+	} else if ( y > y2 ) {
+		keyboard[ KEY_DOWN ] = state;
+	} else {
+		keyboard[ KEY_JUMP ] = state;
 	}
 }
 
@@ -349,7 +367,7 @@ function run_threads( ) {
 	for ( thread_num = 0; thread_num < 256; ++thread_num ) {
 		bytecode_offset = threads_bytecode[ thread_num ];
 		while ( bytecode_offset != 0 ) {
-			opcode = snapshot[ bytecode_offset ];
+			var opcode = snapshot[ bytecode_offset ];
 			//console.log("bytecode_offset=" + bytecode_offset + " opcode=" + opcode);
 			if ( opcode == 0x4e /* N */ ) {
 				break_flag = 1;
@@ -505,7 +523,7 @@ function update_game_state( ) {
 
 		return true;
 	}
-	tile_flags = snapshot[ 0x1ef6 + get_next_tile( ) ];
+	var tile_flags = snapshot[ 0x1ef6 + get_next_tile( ) ];
 	if ( ( tile_flags & 0xf0 ) != 0 ) { // moving walkway
 		draw_object( player_frame, vars1[ 0 ], vars2[ 0 ] );
 		if ( tile_flags & ( 1 << 4 ) ) {
@@ -805,6 +823,8 @@ function init( name ) {
 	canvas = document.getElementById( name );
 	document.onkeydown = function( e ) { set_key_pressed( e.keyCode, 1 ); }
 	document.onkeyup   = function( e ) { set_key_pressed( e.keyCode, 0 ); }
+	canvas.addEventListener( 'mousedown', function( e ) { set_touch_key( e.clientX, e.clientY, 1 ); } );
+	canvas.addEventListener( 'mouseup',   function( e ) { set_touch_key( e.clientX, e.clientY, 0 ); } );
 	audio = new Audio( 'inferrun.ogg' );
 	audio.addEventListener( 'ended' , function( ) { this.currentTime = 0; this.play( ); }, false );
 }

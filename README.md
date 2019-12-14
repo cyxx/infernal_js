@@ -1,7 +1,7 @@
 
 # Infernal Runner JS
 
-This is a Javascript port of the Amstrad CPC game [Infernal Runner](https://www.mobygames.com/game/infernal-runner) developed by Eric Chahi.
+This is a Javascript (HTML5) port of the Amstrad CPC game [Infernal Runner](https://www.mobygames.com/game/infernal-runner) developed by Eric Chahi.
 
 I got curious about the game internals after reading on [Eric website](http://anotherworld.fr/anotherworld_uk/another_world.htm) the game is "coupled to a scripted mini-language".
 
@@ -10,7 +10,7 @@ The information presented here is based on the reverse engineering of the .dsk i
 
 ## Internals
 
-The game executable interprets bytecode with cooperative threading. There could be up to 256 threads.
+The original game executable interprets bytecode with cooperative threading. There could be up to 256 threads.
 Instructions are executed for each thread until it suspends. The execution will then continue with the next thread.
 
 There are 28 opcodes in total, which can be categorized in 5 groups :
@@ -21,7 +21,7 @@ There are 28 opcodes in total, which can be categorized in 5 groups :
 * variables (add, sub, mov)
 * control flow (break, jump)
 
-Implementation of these opcodes can be found [here](https://github.com/cyxx/infernal_js/blob/master/infernal.js#L150)
+Implementation of these opcodes can be found [here](https://github.com/cyxx/infernal_js/blob/master/infernal.js#L169).
 
 As an example, the title screen is not a full screen image but has a dedicated thread to draw its contents (eg. 6 sprites).
 
@@ -68,8 +68,8 @@ There is no z80 emulation, the engine code has been rewritten in Javascript.
 
 There were a few interesting tricks used in the original code :
 
-* use of [BCD](http://en.wikipedia.org/wiki/Binary-coded_decimal) to manipulate decimal numbers (avoiding divides and multiplies)
-* use of XOR to redraw sprites (avoiding double buffering)
+* use of [BCD](https://github.com/cyxx/infernal_js/blob/master/inferrun.asm#L986) to manipulate decimal numbers (avoiding divides and multiplies)
+* use of [XOR](https://github.com/cyxx/infernal_js/blob/master/inferrun.asm#L55) to redraw sprites (avoiding double buffering)
 
 
 ## Status
